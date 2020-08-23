@@ -67,6 +67,25 @@ int num_words(FILE* infile) {
  * Useful functions: fgetc(), isalpha(), tolower(), add_word().
  */
 void count_words(WordCount **wclist, FILE *infile) {
+  char word[MAX_WORD_LEN + 1];
+  size_t index = 0;
+  char c;
+  while ((c = fgetc(infile)) != EOF) {
+    if (isalpha(c)) {
+      word[index++] = tolower(c);
+    }
+    else{
+      word[index] = '\0';
+      if (strlen(word)) {
+        add_word(wclist, word);
+      } 
+      index = 0;
+    }
+  }
+  word[index] = '\0';
+  if (strlen(word)) {
+    add_word(wclist, word);
+  }
 }
 
 /*
@@ -74,7 +93,10 @@ void count_words(WordCount **wclist, FILE *infile) {
  * Useful function: strcmp().
  */
 static bool wordcount_less(const WordCount *wc1, const WordCount *wc2) {
-  return 0;
+  if (wc1->count != wc2->count) {
+    return wc1->count < wc2->count;
+  }
+  return strcmp(wc1->word, wc2->word) < 0;
 }
 
 // In trying times, displays a helpful message.
@@ -142,15 +164,34 @@ int main (int argc, char *argv[]) {
     // The first file can be found at argv[optind]. The last file can be
     // found at argv[argc-1]. You'll need to count words in all specified
     // files.
-    infile = fopen(argv[1], "r");
   }
 
   if (count_mode) {
-    total_words = num_words(infile);
+    if (infile) {
+      total_words = num_words(infile);
+    }
+    else {
+      // there are files specified
+      for (size_t i = optind; i < argc; ++i) {
+        infile = fopen(argv[i], "r");
+        total_words += num_words(infile);
+        fclose(infile);
+      }
+    }
     printf("The total number of words is: %i\n", total_words);
   } else {
+    if (infile) {
+      count_words(&word_counts, infile);
+    }
+    else {
+      // there are files specified
+      for (size_t i = optind; i < argc; ++i) {
+        infile = fopen(argv[i], "r");
+        count_words(&word_counts, infile);
+        fclose(infile);
+      }
+    }
     wordcount_sort(&word_counts, wordcount_less);
-
     printf("The frequencies of each word are: \n");
     fprint_words(word_counts, stdout);
 }
