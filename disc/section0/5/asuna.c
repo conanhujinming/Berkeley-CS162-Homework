@@ -16,7 +16,7 @@ int partition(char* a, int l, int r){
 		while( a[j] > pivot );
 		if( i >= j ) 
 			break;
-		t = a[i]; 
+		t = a[i];
 		a[i] = a[j]; 
 		a[j] = t;
 	}
@@ -38,14 +38,19 @@ void sort(char a[], int l, int r){
 }
 
 void main(int argc, char** argv){
-	char* a = NULL; 
-	if(argc > 1)
-		a = argv[1];
+	const char* no_args = "Asuna is the best char!";
+	char* a = NULL;
+	if(argc > 1) {
+		a = malloc (strlen(argv[1]) * sizeof(char));
+		strcpy(a, argv[1]);
+	}
 	else
-		a = "Asuna is the best char!";
+		a = malloc (strlen(no_args) * sizeof(char));
+		strcpy(a, no_args);
 	printf("Unsorted: \"%s\"\n", a);
 	sort(a, 0, strlen(a) - 1);
 	printf("Sorted:   \"%s\"\n", a);
+	free(a);
 }
 
 
